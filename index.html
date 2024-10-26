@@ -3,6 +3,9 @@
 <html lang="en">
 <head>
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LOCKPAD IOT</title>
@@ -13,54 +16,366 @@
 <header>
     <h1 class = "head_text">LockPad IOT</h1>
 </header>
-<div class="content">
+<div class="full-content">
     <section>
         <h2>รายละเอียดโครงงาน</h2>
-        <p>
+        <p style="font-size: 23px;">
         &emsp;&emsp;โครงการนี้เป็นการนำเทคโนโลยี Microcontroller มาประยุกต์ใช้เพื่อสร้างระบบรักษาความปลอดภัยและความเป็นส่วนตัวผ่าน IoT โดยใช้ Servo, Keypad, LED และ Buzzer ในการพัฒนาเป็นระบบล็อกประตูอัจฉริยะ เพื่อป้องกันการเข้าถึงห้องโดยไม่ได้รับอนุญาต นอกจากนี้ ระบบยังสามารถบันทึกข้อมูลการเข้าใช้งานทุกครั้ง เพื่อให้สามารถตรวจสอบย้อนหลังได้
         </p>
     </section>
 </div>
-<div class="content">
-    <section class="section">
-        <h2>อุปกรณ์ที่ใช้งาน</h2>
-        <p></p>
+<div class="middle-content">
+    <div class="half-content">
+        <section class="section">
+            <h2>อุปกรณ์ที่ใช้งาน</h2>
+            <p style="font-size: 21px;">&emsp;&emsp;อุปกรณ์ที่ใช้ในการทำโปรเจคชิ้นงานนี้</p>
+        </section>
+        <div class="tools-content">
+            <img style="height: 200; width:300px; margin-right: 20px;" src="Image/ARDUINO.png" alt="R4 WIFI">
+            <section class="tools-description">
+                <h3>Arduino r4 wifi</h3>
+                <p>&emsp;บอร์ดไมโครคอนโทรลเลอร์ ที่ใช้ใน Project นี้ 1 ตัว</p>
+            </section>
+        </div><br>
+        <div class="tools-content">
+            <img class="tools-image" src="Image/BUZZER.png" alt="BUZZER">
+            <section class="tools-description">
+                <h3>Buzzer</h3>
+                <p>&emsp;ลำโพงบัซเซอร์ ที่ใช้ใน Project นี้ 1 ตัว</p>
+            </section>
+        </div><br>
+        <div class="tools-content">
+            <img class="tools-image" src="Image/KEYPAD.png" alt="KEYPAD"><br>
+            <section class="tools-description">
+                <h3>Keypad</h3>
+                <p>&emsp;บอร์ดไมโครคอนโทรลเลอร์ ที่ใช้ใน Project นี้ 1 ตัว</p>
+            </section>
+        </div><br>
+        <div class="tools-content">
+            <img class="tools-image" src="Image/LCD.png" alt="LCD"><br>
+            <section class="tools-description">
+                <h3>LCD</h3>
+                <p>&emsp;บอร์ดไมโครคอนโทรลเลอร์ ที่ใช้ใน Project นี้ 1 ตัว</p>
+            </section>
+        </div><br>
+        <div class="tools-content">
+            <img class="tools-image" src="Image/SERVO.png" alt="SERVO"><br>
+            <section class="tools-description">
+                <h3>Servo</h3>
+                <p>&emsp;บอร์ดไมโครคอนโทรลเลอร์ ที่ใช้ใน Project นี้ 1 ตัว</p>
+            </section>
+        </div><br>
+    </div>
+    <div class="half-content">
+        <section class="section">
+            <h2>DEMO VIDEO ของโปรเจก</h2>
+            <p style="font-size: 21px;">&emsp;&emsp;คลิปวิดีโอสาธิตการทำงานของ LockPad Project</p>
+            <iframe style="padding-left: 45px;" width="600" height="400" src="https://www.youtube.com/embed/RJUvNVCqtpI?si=03qIBGqkG8-U65m0&amp;controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </section>
+        <section class="section">
+            <h2>SOURCE CODE ของโปรเจก</h2>
+            <p style="font-size: 21px;">&emsp;&emsp;เป็นโค้ดทั้งหมดของ LockPad Project</p>
+        </section>
+        <div class="code-container">
+            <pre style="color:  #CBDCEB;"><code>
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+const Room = require('../models/Room');
+const RoomType = require('../models/RoomType');
+const { error } = require('console');
+
+class RoomController{
+    //สร้างห้อง
+    async CreateRoom(req, res){
+    let {RoomNum, BuildingNum, Floor , TypeId} = req.body;
+    RoomNum = parseInt(RoomNum);
+    BuildingNum = parseInt(BuildingNum);
+    Floor = parseInt(Floor);
+    TypeId = parseInt(TypeId);
+    try{
+        if(!await RoomType.checkTypeId(TypeId)){
+        return res.status(404).json({error : "RoomType not exist"});
+        }
+        const room = await Room.createRoom(RoomNum, BuildingNum, Floor , TypeId);
+        return res.status(200).json(room.getRoomInfo());
+    } catch (error) {
+        return res.status(500).json({error : error.message});
+    }
+    }
+    //ลบห้อง
+    async DeleteRoom(req, res){
+    const {RoomId} = req.params;
+    try{
+        if(!await Room.roomCheck(RoomId)){
+        return res.status(404).json({error : "Room not exist"});
+        }
+        await Room.deleteRoom(RoomId);
+        return res.status(200).json({message : "Room was deleted"});
+    } catch (error) {
+        return res.status(500).json({error : error.message});
+    }
+    }
+
+    async ChangeRoomStatus(req, res){
+    const {RoomId, Status} = req.params;
+    try{
+        if(!await Room.roomCheck(RoomId)){
+        return res.status(404).json({error : "Room not exist"});
+        }
+        const room = await Room.getRoom(RoomId);
+        await room.changeStatus(Status);
+        return res.status(200).json(room.getRoomInfo());
+    } catch (error) {
+        return res.status(500).json({error : error.message});
+    }
+    }
+
+    async ChangeRoomType(req, res){
+    let {RoomId, TypeId} = req.params;
+    TypeId = parseInt(TypeId);
+    try{
+        if(!await Room.roomCheck(RoomId)){
+        return res.status(404).json({error : "Room not exist"});
+        }
+        if(!await RoomType.checkTypeId(TypeId)){
+        return res.status(404).json({error : "RoomType not exist"});
+        }
+        const room = await Room.getRoom(RoomId);
+        await room.changeType(TypeId);
+        return res.status(200).json(room.getRoomInfo());
+    } catch (error) {
+        return res.status(500).json({error : error.message});
+    }
+    }
+
+    async getRooms(req, res) {
+    try {
+        const userId = req.user.userId; // ดึง userId จาก JWT token
+        const userRole = req.user.role; // ดึง role จาก JWT token
+        if (userRole === 'Owner' || userRole === 'Manager') {
+        // Owner หรือ Manager: ดึงข้อมูลห้องทั้งหมด
+        const rooms = await prisma.room.findMany();
+        return res.status(200).json(rooms);
+        } else if (userRole === 'Tenant') {
+        // ดึงข้อมูลห้องที่เชื่อมโยงกับ Tenant ผ่าน Contract
+        const contracts = await prisma.contract.findFirst({
+            where: {
+            TenantId: parseInt(userId), // ตรวจสอบว่าตรงกับ TenantId ที่รับมา
+            Isactive: true, // ตรวจสอบว่ามีสัญญาที่ยังใช้งานอยู่
+            },
+            include: {
+            Room: true, // รวมข้อมูลห้องที่เชื่อมโยงกัน
+            },
+        });
+        // ตรวจสอบว่า Tenant มีห้องหรือไม่
+        if (!contracts || contracts.length === 0) {
+            return res.status(404).json({ error: 'No rooms found for this tenant' });
+        }
+        const rooms = await prisma.room.findUnique({where : { RoomId : contracts.RoomId}, });
+        return res.status(200).json(rooms);
+        } else {
+        return res.status(403).json({ error: 'Unauthorized access' });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to retrieve rooms: ' + error.message });
+    }
+    }
+
+    async getRoomsByTenantId(req, res) {
+    try {
+        let { TenantId } = req.params;
+        TenantId = parseInt(TenantId);
+        const contract = await prisma.contract.findFirst({
+        where : {TenantId}
+        })
+        if(!contract){
+        return res.status(404).json({error:"Tenant not found"})
+        }
+        const room = prisma.room.findUnique({
+        where : {RoomId:contract.RoomId}, 
+        });
+        return res.status(200).json(room);
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to retrieve rooms: ' + error.message });
+    }
+    }
+
+    async getRooms(req, res) {
+    try {
+        const userId = req.user.userId; // ดึง userId จาก JWT token
+        const userRole = req.user.role; // ดึง role จาก JWT token
+        if (userRole === 'Owner' || userRole === 'Manager') {
+        // Owner หรือ Manager: ดึงข้อมูลห้องทั้งหมด
+        const rooms = await prisma.room.findMany();
+        return res.status(200).json(rooms);
+        } else if (userRole === 'Tenant') {
+        // ดึงข้อมูลห้องที่เชื่อมโยงกับ Tenant ผ่าน Contract
+        const contracts = await prisma.contract.findFirst({
+            where: {
+            TenantId: parseInt(userId), // ตรวจสอบว่าตรงกับ TenantId ที่รับมา
+            Isactive: true, // ตรวจสอบว่ามีสัญญาที่ยังใช้งานอยู่
+            },
+            include: {
+            Room: true, // รวมข้อมูลห้องที่เชื่อมโยงกัน
+            },
+        });
+        // ตรวจสอบว่า Tenant มีห้องหรือไม่
+        if (!contracts || contracts.length === 0) {
+            return res.status(404).json({ error: 'No rooms found for this tenant' });
+        }
+        const rooms = await prisma.room.findUnique({where : { RoomId : contracts.RoomId}, });
+        return res.status(200).json(rooms);
+        } else {
+        return res.status(403).json({ error: 'Unauthorized access' });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to retrieve rooms: ' + error.message });
+    }
+    }
+
+    async getFree(req, res) {
+    try {
+        const room = await prisma.room.findMany({
+        where : {
+            Status : "Free"
+        }
+        })
+        res.status(200).json(room);
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to retrieve rooms: ' + error.message });
+    }
+    }
+
+    async getReserved(req, res) {
+    try {
+        const room = await prisma.room.findMany({
+        where : {
+            Status : "Reserved"
+        }
+        })
+        res.status(200).json(room);
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to retrieve rooms: ' + error.message });
+    }
+    }
+
+    async getRenting(req, res) {
+    try {
+        const room = prisma.room.findMany({
+        where : {
+            Status : "Renting"
+        }
+        })
+        res.status(200).json(room);
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to retrieve rooms: ' + error.message });
+    }
+    }
+    // สร้างประเภทห้อง
+    async CreateRoomType(req, res){
+    let {Name, RentFee} = req.body;
+    RentFee = parseFloat(RentFee);
+    try{
+        const roomtype = await RoomType.createRoomType(Name, parseInt(RentFee));
+        const info = roomtype.getRoomTypeInfo();
+        return res.status(200).json({message : info});
+    } catch (error) {
+        return res.status(500).json({error : error.message});
+    }
+    }
+    
+    async DeleteRoomType(req, res){
+    let {TypeId} = req.params;
+    TypeId = parseInt(TypeId);
+    try{
+        if(!await RoomType.checkTypeId(TypeId)){
+        return res.status(404).json({error : "RoomType not exist"});
+        }
+        await RoomType.DeleteRoomType(TypeId);
+        return res.status(200).json({message : "RoomType was deleted"});
+    } catch (error) {
+        return res.status(500).json({error : error.message});
+    }
+    }
+
+    async ChangeRoomTypeRentFee(req, res){
+    let {TypeId, RentFee} = req.params;
+    TypeId = parseInt(TypeId);
+    RentFee = parseInt(RentFee);
+    try{
+        if(!await RoomType.checkTypeId(TypeId)){
+        return res.status(404).json({error : "RoomType not exist"});
+        }
+        const roomtype = await RoomType.getRoomType(TypeId);
+        await roomtype.ChangeRentFee(RentFee);
+        return res.status(200).json(roomtype.getRoomTypeInfo());
+    } catch (error) {
+        return res.status(500).json({error : error.message});
+    }
+    }
+
+    async getRoomType(req, res){
+    try {
+        const roomtypes = await prisma.roomType.findMany();
+        return res.status(200).json(roomtypes);
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to retrieve roomtypes: ' + error.message });
+    }
+    }
+
+    async getRoomTypeById(req, res){
+    try {
+        let { TypeId } = req.params;
+        TypeId = parseInt(TypeId);
+        const roomtypes = await prisma.roomType.findUnique({where: { TypeId }, });
+        if(!roomtypes){
+        return res.status(404).json({error: "Roomtype not found"});
+        }
+        return res.status(200).json(roomtypes);
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to retrieve roomtypes: ' + error.message });
+    }
+    }
+}
+
+module.exports = new RoomController();
+            </code></pre>
+        </div>
+    </div>
+</div>
+<div class="full-content">
+    <section>
+        <h2>สมาชิกโครงงาน</h2>
     </section>
-    <div class="tools-content">
-        <img style="height: 200; width:300px; margin-right: 20px;" src="Image/ARDUINO.png" alt="R4 WIFI">
-        <section class="tools-description">
-            <h3>Arduino r4 wifi</h3>
-            <p>&emsp;บอร์ดไมโครคอนโทรลเลอร์ ที่ใช้ใน Project นี้ 1 ตัว</p>
-        </section>
-    </div><br>
-    <div class="tools-content">
-        <img class="tools-image" src="Image/BUZZER.png" alt="BUZZER">
-        <section class="tools-description">
-            <h3>Buzzer</h3>
-            <p>&emsp;ลำโพงบัซเซอร์ ที่ใช้ใน Project นี้ 1 ตัว</p>
-        </section>
-    </div><br>
-    <div class="tools-content">
-        <img class="tools-image" src="Image/KEYPAD.png" alt="KEYPAD"><br>
-        <section class="tools-description">
-            <h3>Keypad</h3>
-            <p>&emsp;บอร์ดไมโครคอนโทรลเลอร์ ที่ใช้ใน Project นี้ 1 ตัว</p>
-        </section>
-    </div><br>
-    <div class="tools-content">
-        <img class="tools-image" src="Image/LCD.png" alt="LCD"><br>
-        <section class="tools-description">
-            <h3>LCD</h3>
-            <p>&emsp;บอร์ดไมโครคอนโทรลเลอร์ ที่ใช้ใน Project นี้ 1 ตัว</p>
-        </section>
-    </div><br>
-    <div class="tools-content">
-        <img class="tools-image" src="Image/SERVO.png" alt="SERVO"><br>
-        <section class="tools-description">
-            <h3>Servo</h3>
-            <p>&emsp;บอร์ดไมโครคอนโทรลเลอร์ ที่ใช้ใน Project นี้ 1 ตัว</p>
-        </section>
-    </div><br>
+    <div class="member-container">
+        <div class="member-content">
+            <img class="member-image" src="Image/DON.jpg" alt="DON">
+        </div>
+        <div class="member-content">
+            <img class="member-image" src="Image/TEE.jpg" alt="TEE">
+        </div>
+        <div class="member-content">
+            <img class="member-image" src="Image/FERN.jpg" alt="FERN">
+        </div>
+        <div class="member-content">
+            <section class="tools-description">
+                <h3>DON</h3>
+                <p style="justify-self: center;">66070225 นาย อิงครัตน์อาตาปิยธรรม</p>
+            </section>
+        </div>
+        <div class="member-content">
+            <section class="tools-description">
+                <h3>TEE</h3>
+                <p style="justify-self: center;">66070218 นาย อภิรักษ์ แซ่จิว</p>
+            </section>
+        </div>
+        <div class="member-content">
+            <section class="tools-description">
+                <h3>FERN</h3>
+                <p style="justify-self: center;">66070179 นางสาว วรรณวิสา สถิตอยู่คู่ไทย</p>
+            </section>
+        </div>
+    </div>
 </div>
 <!-- <div class="row content">
 </div> -->

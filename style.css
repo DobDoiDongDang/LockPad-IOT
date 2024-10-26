@@ -1,14 +1,17 @@
 body {
     font-size: 18px;
-    font-family: 'Kanit', sans-serif;
-    background-color: #7AB2D3;
+    font-family: "IBM Plex Sans Thai", sans-serif;
+    background-color: #7AB2D3;/* Backgound */
     color: #000000ef;
 }
 header {
-    background-color: #4A628A;
-    color: #608BC1;
+    background-color: #4A628A; /* Head BG */
+    color: #608BC1; /* Head font */
     padding: 10px 20px;
     text-align: center;
+}
+p {
+    font-size: 18px;
 }
 .head_text {
     color:  #CBDCEB;
@@ -16,7 +19,12 @@ header {
 .all-content {
     align-items:center;
 }
-.content {
+.middle-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* สร้าง 3 คอลัมน์ที่มีขนาดเท่ากัน */
+    gap: 10px; /* กำหนดระยะห่างระหว่างคอลัมน์ */
+}
+.full-content {
     /* width: 800px; */
     margin: 20px;
     padding: 20px;
@@ -24,14 +32,32 @@ header {
     border-radius: 8px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
-.r-content {
+.half-content {
+    /* width: 800px; */
     margin: 20px;
     padding: 20px;
     background-color: #B9E5E8;
     border-radius: 8px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
-
+.member-image {
+    height: 300px;
+    width: 300px;
+    display: flex;
+}
+.member-content {
+    display: flex;
+    justify-self: center; /* จัด item ให้อยู่ตรงกลางแนวนอน */
+    align-self: center; /* จัด item ให้อยู่ตรงกลางแนวตั้ง */
+}
+.member-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr); /* สร้าง 2 แถว */
+    gap: 5px;
+    justify-content: center; /* จัดให้อยู่ตรงกลางแนวนอน */
+    align-items: center; /* จัดให้อยู่ตรงกลางแนวตั้ง */
+}
 h1, h2 {
     color: #333;
 }
@@ -40,11 +66,13 @@ h1, h2 {
     align-items:center;
     padding-bottom: 40px;
 }
+
 .tools-image {
     height: 300px;
     width: 300px;
     margin-right: 20px;
 }
+
 .tools-description {
     width: 400px;
     height: 200px;
@@ -53,6 +81,7 @@ h1, h2 {
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
 }
+
 .section {
     margin-bottom: 20px;
 }
@@ -61,4 +90,17 @@ h1, h2 {
     padding: 20px;
     font-size: 0.9em;
     color: #888;
+}
+
+
+.code-container {
+    justify-self: center;
+    height: 1100px; /* กำหนดความสูงสูงสุด */
+    width: 800px;
+    overflow-y: scroll; /* แสดง scroll bar ในแนวตั้ง */
+    background-color: #171d32; /* สีพื้นหลัง */
+    border: 3px solid #ffffff; /* ขอบกล่อง */
+    padding: 5px;
+    font-family: monospace; /* ฟอนต์สำหรับโค้ด
+    white-space: pre; /* แสดงช่องว่างตามที่กำหนดไว้ */
 }
