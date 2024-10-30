@@ -3,7 +3,7 @@
 Github for Physical computing mini project
 โครงการนี้เป็นการนำเทคโนโลยี Microcontroller มาประยุกต์ใช้เพื่อสร้างระบบรักษาความปลอดภัยและความเป็นส่วนตัวผ่าน IoT โดยใช้ Servo, Keypad และ Buzzer ในการพัฒนาเป็นระบบล็อกประตูอัจฉริยะ เพื่อป้องกันการเข้าถึงห้องโดยไม่ได้รับอนุญาต นอกจากนี้ ระบบยังสามารถบันทึกข้อมูลการเข้าใช้งานทุกครั้ง เพื่อให้สามารถตรวจสอบย้อนหลังได้
 
-Video แนะนำการทำงาน : https://www.youtube.com/watch?v=tD4eFZBpVL8 \n
+Video แนะนำการทำงาน : https://www.youtube.com/watch?v=tD4eFZBpVL8 <br />
 Webpage ของ LockPad : https://dobdoidongdang.github.io/LockPad-IOT/
 ## สมาชิกผู้จัดทำ
 | ชื่อ - นามสกุล | รหัสนักศึกษา |
