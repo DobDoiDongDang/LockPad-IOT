@@ -20,7 +20,7 @@
     <section>
         <h2>รายละเอียดโครงงาน</h2>
         <p style="font-size: 23px;">
-        &emsp;&emsp;โครงการนี้เป็นการนำเทคโนโลยี Microcontroller มาประยุกต์ใช้เพื่อสร้างระบบรักษาความปลอดภัยและความเป็นส่วนตัวผ่าน IoT โดยใช้ Servo, Keypad, LED และ Buzzer ในการพัฒนาเป็นระบบล็อกประตูอัจฉริยะ เพื่อป้องกันการเข้าถึงห้องโดยไม่ได้รับอนุญาต นอกจากนี้ ระบบยังสามารถบันทึกข้อมูลการเข้าใช้งานทุกครั้ง เพื่อให้สามารถตรวจสอบย้อนหลังได้
+        &emsp;&emsp;โครงการนี้เป็นการนำเทคโนโลยี Microcontroller มาประยุกต์ใช้เพื่อสร้างระบบรักษาความปลอดภัยและความเป็นส่วนตัวผ่าน IoT โดยใช้ Servo, Keypad และ Buzzer ในการพัฒนาเป็นระบบล็อกประตูอัจฉริยะ เพื่อป้องกันการเข้าถึงห้องโดยไม่ได้รับอนุญาต นอกจากนี้ ระบบยังสามารถบันทึกข้อมูลการเข้าใช้งานทุกครั้ง เพื่อให้สามารถตรวจสอบย้อนหลังได้
         </p>
     </section>
 </div>
@@ -70,275 +70,307 @@
         <section class="section">
             <h2>DEMO VIDEO ของโปรเจก</h2>
             <p style="font-size: 21px;">&emsp;&emsp;คลิปวิดีโอสาธิตการทำงานของ LockPad Project</p>
-            <iframe style="padding-left: 45px;" width="600" height="400" src="https://www.youtube.com/embed/RJUvNVCqtpI?si=03qIBGqkG8-U65m0&amp;controls=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-        </section>
+            <iframe style="padding-left: 45px;" width="600" height="400" src="https://www.youtube.com/embed/tD4eFZBpVL8?si=LVSTvE6h0xVCI-o-" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         <section class="section">
             <h2>SOURCE CODE ของโปรเจก</h2>
             <p style="font-size: 21px;">&emsp;&emsp;เป็นโค้ดทั้งหมดของ LockPad Project</p>
         </section>
         <div class="code-container">
             <pre style="color:  #CBDCEB;"><code>
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-const Room = require('../models/Room');
-const RoomType = require('../models/RoomType');
-const { error } = require('console');
+#include WiFiS3.h  // Include the WiFi library for Arduino Uno R4 WiFi
+#include WiFiServer.h
+#include Wire.h
+#include LiquidCrystal_I2C.h
+#include Keypad.h
+#include NTPClient.h
+#include WiFiUdp.h
+#include Servo.h
 
-class RoomController{
-    //สร้างห้อง
-    async CreateRoom(req, res){
-    let {RoomNum, BuildingNum, Floor , TypeId} = req.body;
-    RoomNum = parseInt(RoomNum);
-    BuildingNum = parseInt(BuildingNum);
-    Floor = parseInt(Floor);
-    TypeId = parseInt(TypeId);
-    try{
-        if(!await RoomType.checkTypeId(TypeId)){
-        return res.status(404).json({error : "RoomType not exist"});
-        }
-        const room = await Room.createRoom(RoomNum, BuildingNum, Floor , TypeId);
-        return res.status(200).json(room.getRoomInfo());
-    } catch (error) {
-        return res.status(500).json({error : error.message});
-    }
-    }
-    //ลบห้อง
-    async DeleteRoom(req, res){
-    const {RoomId} = req.params;
-    try{
-        if(!await Room.roomCheck(RoomId)){
-        return res.status(404).json({error : "Room not exist"});
-        }
-        await Room.deleteRoom(RoomId);
-        return res.status(200).json({message : "Room was deleted"});
-    } catch (error) {
-        return res.status(500).json({error : error.message});
-    }
-    }
+// Replace with your WiFi network credentials
+const char ssid[] = "Tenda";
+const char password[] = "023153000";
+String formValue = "00000";
+const char *login_log[100] = {};
+int log_count = 0;  // used slots
+String nowtime;
 
-    async ChangeRoomStatus(req, res){
-    const {RoomId, Status} = req.params;
-    try{
-        if(!await Room.roomCheck(RoomId)){
-        return res.status(404).json({error : "Room not exist"});
-        }
-        const room = await Room.getRoom(RoomId);
-        await room.changeStatus(Status);
-        return res.status(200).json(room.getRoomInfo());
-    } catch (error) {
-        return res.status(500).json({error : error.message});
-    }
-    }
+int buzzer = 10;
+Servo myservo;
+// Set up a server on port 80 (HTTP)
+WiFiServer server(80);
 
-    async ChangeRoomType(req, res){
-    let {RoomId, TypeId} = req.params;
-    TypeId = parseInt(TypeId);
-    try{
-        if(!await Room.roomCheck(RoomId)){
-        return res.status(404).json({error : "Room not exist"});
-        }
-        if(!await RoomType.checkTypeId(TypeId)){
-        return res.status(404).json({error : "RoomType not exist"});
-        }
-        const room = await Room.getRoom(RoomId);
-        await room.changeType(TypeId);
-        return res.status(200).json(room.getRoomInfo());
-    } catch (error) {
-        return res.status(500).json({error : error.message});
-    }
-    }
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-    async getRooms(req, res) {
-    try {
-        const userId = req.user.userId; // ดึง userId จาก JWT token
-        const userRole = req.user.role; // ดึง role จาก JWT token
-        if (userRole === 'Owner' || userRole === 'Manager') {
-        // Owner หรือ Manager: ดึงข้อมูลห้องทั้งหมด
-        const rooms = await prisma.room.findMany();
-        return res.status(200).json(rooms);
-        } else if (userRole === 'Tenant') {
-        // ดึงข้อมูลห้องที่เชื่อมโยงกับ Tenant ผ่าน Contract
-        const contracts = await prisma.contract.findFirst({
-            where: {
-            TenantId: parseInt(userId), // ตรวจสอบว่าตรงกับ TenantId ที่รับมา
-            Isactive: true, // ตรวจสอบว่ามีสัญญาที่ยังใช้งานอยู่
-            },
-            include: {
-            Room: true, // รวมข้อมูลห้องที่เชื่อมโยงกัน
-            },
-        });
-        // ตรวจสอบว่า Tenant มีห้องหรือไม่
-        if (!contracts || contracts.length === 0) {
-            return res.status(404).json({ error: 'No rooms found for this tenant' });
-        }
-        const rooms = await prisma.room.findUnique({where : { RoomId : contracts.RoomId}, });
-        return res.status(200).json(rooms);
-        } else {
-        return res.status(403).json({ error: 'Unauthorized access' });
-        }
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to retrieve rooms: ' + error.message });
-    }
-    }
+const byte numRows = 4; // Number of rows on the keypad
+const byte numCols = 4; // Number of columns on the keypad
 
-    async getRoomsByTenantId(req, res) {
-    try {
-        let { TenantId } = req.params;
-        TenantId = parseInt(TenantId);
-        const contract = await prisma.contract.findFirst({
-        where : {TenantId}
-        })
-        if(!contract){
-        return res.status(404).json({error:"Tenant not found"})
-        }
-        const room = prisma.room.findUnique({
-        where : {RoomId:contract.RoomId}, 
-        });
-        return res.status(200).json(room);
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to retrieve rooms: ' + error.message });
-    }
-    }
+String pass = "00000";
+String inpass = "";
+bool pass_type = true;
 
-    async getRooms(req, res) {
-    try {
-        const userId = req.user.userId; // ดึง userId จาก JWT token
-        const userRole = req.user.role; // ดึง role จาก JWT token
-        if (userRole === 'Owner' || userRole === 'Manager') {
-        // Owner หรือ Manager: ดึงข้อมูลห้องทั้งหมด
-        const rooms = await prisma.room.findMany();
-        return res.status(200).json(rooms);
-        } else if (userRole === 'Tenant') {
-        // ดึงข้อมูลห้องที่เชื่อมโยงกับ Tenant ผ่าน Contract
-        const contracts = await prisma.contract.findFirst({
-            where: {
-            TenantId: parseInt(userId), // ตรวจสอบว่าตรงกับ TenantId ที่รับมา
-            Isactive: true, // ตรวจสอบว่ามีสัญญาที่ยังใช้งานอยู่
-            },
-            include: {
-            Room: true, // รวมข้อมูลห้องที่เชื่อมโยงกัน
-            },
-        });
-        // ตรวจสอบว่า Tenant มีห้องหรือไม่
-        if (!contracts || contracts.length === 0) {
-            return res.status(404).json({ error: 'No rooms found for this tenant' });
-        }
-        const rooms = await prisma.room.findUnique({where : { RoomId : contracts.RoomId}, });
-        return res.status(200).json(rooms);
-        } else {
-        return res.status(403).json({ error: 'Unauthorized access' });
-        }
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to retrieve rooms: ' + error.message });
-    }
-    }
+String buffer = "";
+const char* lcdtext;
+// Keymap defines the key pressed according to the row and columns
+char keymap[numRows][numCols] = 
+{
+{'1', '2', '3', 'A'}, 
+{'4', '5', '6', 'B'}, 
+{'7', '8', '9', 'C'},
+{'*', '0', '#', 'D'}
+};
 
-    async getFree(req, res) {
-    try {
-        const room = await prisma.room.findMany({
-        where : {
-            Status : "Free"
-        }
-        })
-        res.status(200).json(room);
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to retrieve rooms: ' + error.message });
-    }
-    }
+// Keypad connections to the Arduino pins
+byte rowPins[numRows] = {9, 8, 7, 6}; // Rows 0 to 3
+byte colPins[numCols] = {5, 4, 3, 2}; // Columns 0 to 3
 
-    async getReserved(req, res) {
-    try {
-        const room = await prisma.room.findMany({
-        where : {
-            Status : "Reserved"
-        }
-        })
-        res.status(200).json(room);
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to retrieve rooms: ' + error.message });
-    }
-    }
+// Initializes an instance of the Keypad class
+Keypad myKeypad = Keypad(makeKeymap(keymap), rowPins, colPins, numRows, numCols);
 
-    async getRenting(req, res) {
-    try {
-        const room = prisma.room.findMany({
-        where : {
-            Status : "Renting"
-        }
-        })
-        res.status(200).json(room);
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to retrieve rooms: ' + error.message });
-    }
-    }
-    // สร้างประเภทห้อง
-    async CreateRoomType(req, res){
-    let {Name, RentFee} = req.body;
-    RentFee = parseFloat(RentFee);
-    try{
-        const roomtype = await RoomType.createRoomType(Name, parseInt(RentFee));
-        const info = roomtype.getRoomTypeInfo();
-        return res.status(200).json({message : info});
-    } catch (error) {
-        return res.status(500).json({error : error.message});
-    }
-    }
-    
-    async DeleteRoomType(req, res){
-    let {TypeId} = req.params;
-    TypeId = parseInt(TypeId);
-    try{
-        if(!await RoomType.checkTypeId(TypeId)){
-        return res.status(404).json({error : "RoomType not exist"});
-        }
-        await RoomType.DeleteRoomType(TypeId);
-        return res.status(200).json({message : "RoomType was deleted"});
-    } catch (error) {
-        return res.status(500).json({error : error.message});
-    }
-    }
-
-    async ChangeRoomTypeRentFee(req, res){
-    let {TypeId, RentFee} = req.params;
-    TypeId = parseInt(TypeId);
-    RentFee = parseInt(RentFee);
-    try{
-        if(!await RoomType.checkTypeId(TypeId)){
-        return res.status(404).json({error : "RoomType not exist"});
-        }
-        const roomtype = await RoomType.getRoomType(TypeId);
-        await roomtype.ChangeRentFee(RentFee);
-        return res.status(200).json(roomtype.getRoomTypeInfo());
-    } catch (error) {
-        return res.status(500).json({error : error.message});
-    }
-    }
-
-    async getRoomType(req, res){
-    try {
-        const roomtypes = await prisma.roomType.findMany();
-        return res.status(200).json(roomtypes);
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to retrieve roomtypes: ' + error.message });
-    }
-    }
-
-    async getRoomTypeById(req, res){
-    try {
-        let { TypeId } = req.params;
-        TypeId = parseInt(TypeId);
-        const roomtypes = await prisma.roomType.findUnique({where: { TypeId }, });
-        if(!roomtypes){
-        return res.status(404).json({error: "Roomtype not found"});
-        }
-        return res.status(200).json(roomtypes);
-    } catch (error) {
-        return res.status(500).json({ error: 'Failed to retrieve roomtypes: ' + error.message });
-    }
-    }
+void log_add(const char *s) {
+if (log_count < 100) {
+    login_log[log_count++] = s;
+}
 }
 
-module.exports = new RoomController();
+void refreshLCD(){
+lcd.clear();
+lcd.setCursor(0, 0);
+lcd.print("Enter Password:");
+lcd.setCursor(0, 1);
+if(pass_type == 0){
+lcd.print(inpass);
+}else{
+for(int i = 1;i<=inpass.length();i++){
+    lcd.print("*");
+    }
+}
+}
+
+WiFiUDP ntpUDP;
+
+// By default 'pool.ntp.org' is used with 60 seconds update interval and
+// no offset
+NTPClient timeClient(ntpUDP, "th.pool.ntp.org", 25200);
+
+void success_login(){
+tone(buzzer, 1000);
+myservo.write(90);
+delay(1500);
+myservo.write(0);
+noTone(buzzer);
+}
+
+void setup() {
+Serial.begin(9600);
+pinMode(buzzer, OUTPUT);
+myservo.attach(11);
+myservo.write(0);
+// Connect to WiFi
+Serial.print("Connecting to WiFi...");
+WiFi.begin(ssid, password);
+while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+}
+Serial.println("Connected to WiFi!");
+
+// Print IP Address
+Serial.print("IP Address: ");
+Serial.println(WiFi.localIP());
+
+// Start the server
+server.begin();
+Serial.println("Server started");
+
+lcd.init();
+lcd.init();
+lcd.backlight();
+lcd.setCursor(0, 0);
+lcd.print("A=delete c=reset");
+lcd.setCursor(0, 1);
+lcd.print("B=view type D=OK");
+
+timeClient.begin();
+}
+
+void loop() {
+
+//-------------------server-----------------------
+
+//update clock
+timeClient.update();
+// Check for incoming client connection
+WiFiClient client = server.available();
+if (client) {
+    Serial.println("New Client connected");
+    
+    // Read the request
+    String request = client.readStringUntil('\r');
+    Serial.println(request);
+    client.flush();
+
+    // Parse the request
+    if (request.indexOf("GET /?input=") >= 0) {
+    int inputIndex = request.indexOf("input=") + 6;
+    int spaceIndex = request.indexOf(' ', inputIndex);
+    formValue = request.substring(inputIndex, spaceIndex);
+    formValue.replace("+", " "); // Replace '+' with spaces for readability
+    }
+
+    // Send the response back to the client (a simple form)
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-Type: text/html");
+    client.println("Connection: close");
+    client.println();
+    client.println("!DOCTYPE HTML>");
+    client.println("html>");
+    client.println("body background='https://www.it.kmitl.ac.th/~pattarachai/PIC/BG/stone.gif'>");
+    client.println("div style=\"margin: auto; width: 50%;\">");
+    client.println("h1>LOCKPAT-IOT/h1>");
+    
+    // If there's a value from the form, display it
+    if (formValue != "") {
+    client.println("p>Your password: " + formValue + "/p");
+    Serial.println(formValue);
+    pass = formValue;
+    }
+    
+    // Display a form for the user to submit data
+    client.println("form action='/' method='GET'>");
+    client.println("Enter new password: input type='text' name='input'br");
+    client.println("input type='submit' value='Submit'>");
+    client.println("/form>");
+
+    client.println("ul>");
+
+    //If there's a value in log
+    if (sizeof(login_log) / sizeof(login_log[0]) > 1){
+    for (int i = 1;i < log_count;){
+        client.print("li>");
+        Serial.println(String(i));
+        client.print(login_log[i++]);
+        client.print(" : ");
+        Serial.println(" : ");
+        Serial.println(login_log[i]);
+        client.print(login_log[i++]);
+        client.println("/li>");
+    }
+    }
+
+    client.println("/ul>");
+    client.println("/div>");
+    client.println("/body>");
+    client.println("/html>");
+    
+    // Close the connection
+    client.stop();
+    Serial.println("Client disconnected");
+}
+
+//-------------------Hardware-----------------------
+
+char keypressed = myKeypad.getKey();
+if (keypressed != NO_KEY) {
+    Serial.println(keypressed);
+
+    // Control LEDs based on key presses
+    switch (keypressed) {
+    case '1':
+        inpass = inpass + "1";
+        refreshLCD();
+        break;
+    case '2':
+        inpass = inpass + "2";
+        refreshLCD();
+        break;
+    case '3':
+        inpass = inpass + "3";
+        refreshLCD();
+        break;
+    case '4':
+        inpass = inpass + "4";
+        refreshLCD();
+        break;
+    case '5':
+        inpass = inpass + "5";
+        refreshLCD();
+        break;
+    case '6':
+        inpass = inpass + "6";
+        refreshLCD();
+        break;
+    case '7':
+        inpass = inpass + "7";
+        refreshLCD();
+        break;
+    case '8':
+        inpass = inpass + "8";
+        refreshLCD();
+        break;
+    case '9':
+        inpass = inpass + "9";
+        refreshLCD();
+        break;
+    case '0':
+        inpass = inpass + "0";
+        refreshLCD();
+        break;
+    case '*':
+        inpass = inpass + "*";
+        refreshLCD();
+        break;
+    case '#':
+        inpass = inpass + "#";
+        refreshLCD();
+        break;
+    case 'A':
+        if (inpass.length() >= 1) {
+        inpass.remove(inpass.length() - 1);
+        }
+        refreshLCD();
+        break;
+    case 'B':
+        pass_type = !pass_type;
+        refreshLCD();
+        break;
+    case 'C':
+        inpass = "";
+        refreshLCD();
+        break;
+    case 'D':
+        nowtime = timeClient.getFormattedTime();
+        if (inpass.equals("")) {
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Welcome!!!");
+        lcd.setCursor(0, 1);
+        lcd.print("now ");
+        lcd.print(nowtime);
+        delay(1500);
+        refreshLCD();
+        } else {
+        lcd.clear();
+        //log_add(nowtime.c_str());
+        if (pass.compareTo(inpass) == 0) {
+            log_add("Success");
+            lcd.print("Success");
+            success_login();
+        } else {
+            log_add("fail!");
+            lcd.print("fail!");
+            delay(1500);
+        }
+        for (int i = 0;ilog_count;i++){Serial.println(login_log[i]);}
+        inpass = "";
+        refreshLCD();
+        }
+        break;
+    default:
+        break;
+    }
+}
+}
+
             </code></pre>
         </div>
     </div>
